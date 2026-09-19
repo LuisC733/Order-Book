@@ -11,11 +11,10 @@ public:
     std::map<Price, PriceLevelOrders, std::less<>> asks;
     std::unordered_map<OrderId, Handle> orders;
 
-    bool canMatch(Order order);
-    void Add(Order order);
+    void AddOrder(Order order);
     template <typename T>
-    void Matching(T& map, Order order);
-    void Helper(Order order);
+    void HelperAddOrder(T& map, Order order);
+    void DeleteOrder(OrderId orderId);
     template <typename T>
     void Rest(T& map, Order order);
     void Cancel(OrderId orderId);
