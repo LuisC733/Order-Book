@@ -24,17 +24,37 @@ void Orderbook::HelperAddOrder(T& map, Order order) {
     handle.location = location;
     orders.insert(std::pair<OrderId, Handle> (order.GetOrderId(), handle));
 }
-void Orderbook::Cancel(OrderId orderId) {
+void Orderbook::DeleteOrder(OrderId orderId) {
     auto it = orders.find(orderId);
-    if (it->second.side == Side::Buy) {HelperCancel(bids, orderId);}
-    if (it->second.side == Side::Sell) {HelperCancel(asks, orderId);}
+    if (it == orders.end()) {
+        std::cerr << "Error: Order not found!" << orderId << "\n";
+        return;
+    };
+    if (it->second.side == Side::Buy) {HelperDeleteOrder(bids, orderId, it);}
+    if (it->second.side == Side::Sell) {HelperDeleteOrder(asks, orderId, it);}
 };
 template <typename T>
-void Orderbook::HelperCancel(T& map, OrderId id) {
-    auto const it = orders.find(id);
+void Orderbook::HelperDeleteOrder(T& map, OrderId orderId, auto it) {
     auto const list = map.find(it->second.price);
     PriceLevelOrders &levelOrder = list->second;
-    levelOrder.erase(it->second.location); //FIX
+    levelOrder.erase(it->second.location);
     if (levelOrder.empty()) {map.erase(it->second.price);}
-    orders.erase(id);
+    orders.erase(orderId);
 };
+
+void Orderbook::ReplaceOrder(Order order, OrderId orderId) {
+    DeleteOrder(orderId);
+    AddOrder(order);
+};
+void Orderbook::OrderExecuted(OrderId orderId, Quantity quantity) {
+    auto const it = orders.find(orderId);
+    if (it == orders.end()) {
+        std::cerr << "Error: Order not found!\n";
+        return;
+    };
+    auto order = it->second.location;
+    order->SetQuantity(order->GetQuantity() - quantity);
+    if (order->GetQuantity() == 0) {
+        DeleteOrder(orderId);
+    };
+}

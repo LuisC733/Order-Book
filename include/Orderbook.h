@@ -16,10 +16,9 @@ public:
     void HelperAddOrder(T& map, Order order);
     void DeleteOrder(OrderId orderId);
     template <typename T>
-    void Rest(T& map, Order order);
-    void Cancel(OrderId orderId);
-    template <typename T>
-    void HelperCancel(T& map, OrderId id);
+    void HelperDeleteOrder(T& map, OrderId id, auto it);
+    void ReplaceOrder(Order order, OrderId orderId);
+    void OrderExecuted(OrderId orderId, Quantity quantity);
 };
 
 #endif //ORDERBOOK_ORDERBOOK_H
